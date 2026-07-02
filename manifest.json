@@ -1,0 +1,55 @@
+{
+  "manifest_version": "0.2",
+  "name": "qrcake",
+  "display_name": "QR Cake",
+  "version": "0.1.0",
+  "description": "Create and manage dynamic QR codes — repoint destinations and read scan analytics from a conversation.",
+  "long_description": "QR Cake makes **dynamic QR codes**: the printed code never changes, but you can repoint where it leads at any time.\n\nWith this extension Claude can:\n\n- Create a dynamic QR code for any URL, with optional name and colours\n- List your codes and see where each one points\n- **Change a code's destination** without reprinting it\n- Show scan analytics: scans per day, countries, and devices (plans with analytics)\n- Check your plan usage and limits\n\nYou'll need a free QR Cake account and an API key from the dashboard (Dashboard → API Keys).",
+  "author": {
+    "name": "QR Cake",
+    "email": "support@qrcake.com",
+    "url": "https://qrcake.com"
+  },
+  "homepage": "https://qrcake.com",
+  "documentation": "https://qrcake.com/docs",
+  "support": "mailto:support@qrcake.com",
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.cjs",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.cjs"],
+      "env": {
+        "QRCAKE_API_KEY": "${user_config.api_key}"
+      }
+    }
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "QR Cake API key",
+      "description": "Create one at qrcake.com → Dashboard → API Keys. The key scopes every action to your account.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "tools": [
+    { "name": "create_qr_code", "description": "Create a dynamic QR code that points to a URL." },
+    { "name": "list_qr_codes", "description": "List your QR codes with destinations and scan links." },
+    { "name": "get_qr_code", "description": "Get one QR code's details by id." },
+    { "name": "update_qr_destination", "description": "Change where an existing QR code points — no reprint needed." },
+    { "name": "delete_qr_code", "description": "Permanently delete a QR code." },
+    { "name": "get_account", "description": "Show plan tier, usage, and limits." },
+    { "name": "get_qr_analytics", "description": "Scan analytics: per-day counts, countries, or devices." }
+  ],
+  "keywords": ["qr code", "dynamic qr", "qr generator", "scan analytics", "marketing"],
+  "license": "Proprietary",
+  "privacy_policies": ["https://qrcake.com/privacy"],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  }
+}

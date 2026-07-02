@@ -53,6 +53,7 @@ server.registerTool(
     description:
       'Create a dynamic QR Cake QR code that points to a URL. Dynamic means the destination can be changed later ' +
       'with update_qr_destination without reprinting the code. Returns the scannable short link and the code id.',
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     inputSchema: {
       destination_url: z.string().url().describe('The URL the QR code should point to (where a scan lands).'),
       name: z.string().max(120).optional().describe('A label to identify this code in the dashboard.'),
@@ -102,6 +103,7 @@ server.registerTool(
   {
     title: 'List QR codes',
     description: 'List the QR codes on the connected QR Cake account, with their destinations and scan links.',
+    annotations: { readOnlyHint: true, openWorldHint: false },
     inputSchema: {},
   },
   async () =>
@@ -120,6 +122,7 @@ server.registerTool(
   {
     title: 'Get a QR code',
     description: 'Get the details of a single QR code by its id, including its current destination and scan link.',
+    annotations: { readOnlyHint: true, openWorldHint: false },
     inputSchema: {
       product_id: z.string().describe('The QR code id (returned by create_qr_code / list_qr_codes).'),
     },
@@ -138,6 +141,7 @@ server.registerTool(
     description:
       'Change where an existing QR code points. The physical/printed code is unchanged — only the destination URL ' +
       'updates. This is the core benefit of dynamic QR codes.',
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     inputSchema: {
       product_id: z.string().describe('The QR code id to update.'),
       destination_url: z.string().url().describe('The new URL the QR code should point to.'),
@@ -161,6 +165,7 @@ server.registerTool(
     title: 'Delete a QR code',
     description:
       'Permanently delete a QR code. After this, scanning the printed code will no longer resolve. This cannot be undone.',
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
     inputSchema: {
       product_id: z.string().describe('The QR code id to delete.'),
     },
@@ -177,6 +182,7 @@ server.registerTool(
   {
     title: 'Get account plan and usage',
     description: 'Show the connected QR Cake account plan tier, how many QR codes are used, and the plan limit.',
+    annotations: { readOnlyHint: true, openWorldHint: false },
     inputSchema: {},
   },
   async () =>
@@ -223,6 +229,7 @@ server.registerTool(
       'country (locations), or by device/OS/browser (devices), over the last week, month, or year. Requires a ' +
       'QR Cake plan with analytics. The query runs asynchronously — if results are still being computed, ' +
       'call the tool again shortly.',
+    annotations: { readOnlyHint: true, openWorldHint: false },
     inputSchema: {
       product_id: z.string().describe('The QR code id to get analytics for.'),
       type: z

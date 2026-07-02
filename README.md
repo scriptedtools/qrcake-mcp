@@ -48,6 +48,19 @@ The server is configured entirely through environment variables:
 
 ## Add it to Claude
 
+### Claude Desktop — one-click extension (.mcpb)
+
+Build the desktop extension bundle:
+
+```bash
+npm run bundle:mcpb
+```
+
+This produces `dist-mcpb/qrcake-<version>.mcpb` (manifest + single-file server, validated
+with the official `mcpb` CLI). Double-click it, or in Claude Desktop go to
+Settings → Extensions → Install extension, then paste your API key when prompted.
+The key is stored by Claude Desktop in the OS keychain.
+
 ### Claude Code (CLI)
 
 ```bash
@@ -101,3 +114,22 @@ else is identical.
 The connector is a thin adapter over QR Cake's public API-key REST API
 (`/v1/product/api/*`, documented at [qrcake.com/openapi.json](https://qrcake.com/openapi.json)).
 Products live in QRPush; the connector never stores anything itself.
+
+## Privacy Policy
+
+QR Cake's privacy policy: **<https://qrcake.com/privacy>**
+
+Connector-specific data handling:
+
+- **What it collects**: nothing. The connector runs locally and keeps no data of its own —
+  no logs, no telemetry, no analytics.
+- **Where data goes**: tool calls are sent directly from your machine to the QR Cake API
+  (`api.qrcake.com`) over HTTPS, authenticated with your API key. No third parties are
+  contacted.
+- **What QR Cake receives**: the QR code operations you ask for (destinations, names,
+  colours) — the same data as using the QR Cake dashboard. Handling and retention are
+  governed by the [QR Cake privacy policy](https://qrcake.com/privacy).
+- **Credential storage**: your API key is stored by the Claude client (in Claude Desktop,
+  the OS keychain via the extension's sensitive config), never by this connector. Revoke
+  it anytime in the dashboard under API Keys.
+- **Contact**: <support@qrcake.com>.
