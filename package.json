@@ -1,0 +1,30 @@
+{
+  "name": "@scriptedtools/qrcake-mcp",
+  "version": "0.1.0",
+  "description": "QR Cake connector for Claude (MCP server) — create and manage dynamic QR codes from a conversation.",
+  "type": "module",
+  "bin": {
+    "qrcake-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js",
+    "dev": "node --loader tsx src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
