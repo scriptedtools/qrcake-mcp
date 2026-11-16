@@ -1,6 +1,6 @@
 {
   "name": "qrcake",
-  "displayName": "QR Cake",
+  "displayName": "QR Cake - Dynamic QR Code Manager",
   "version": "0.6.1",
   "description": "Ask Claude how your QR Cake codes are performing (scans over time, places and devices) and create, list, find, restyle, update, pause and delete your dynamic QR codes, including codes for PDFs, videos and photos and your own logo, with your existing QR Cake account.",
   "author": {
