@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.qrcake/mcp",
+  "title": "QR Cake",
+  "description": "Create, update, restyle and track the dynamic QR codes in your QR Cake account.",
+  "version": "1.0.0",
+  "websiteUrl": "https://qrcake.com",
+  "repository": {
+    "url": "https://github.com/scriptedtools/qrcake-mcp",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.qrcake.com/mcp"
+    }
+  ]
+}
