@@ -1,135 +1,154 @@
-# QR Cake connector for Claude
+# QR Cake MCP server, Claude plugin and API examples
 
-An [MCP](https://modelcontextprotocol.io) server that lets Claude create and manage
-**dynamic** QR Cake QR codes from a conversation. Because the codes are dynamic, the
-destination can be changed later without reprinting — so Claude can make a code now
-and repoint it next week.
+[QR Cake](https://qrcake.com/) is a dynamic QR code generator. A QR Cake code points at a short link, so you can change where it goes after it is printed, [see how often and where it is scanned](https://qrcake.com/qr-code-tracking), and keep it working: [codes on the free plan do not expire](https://qrcake.com/qr-code-generator-no-expiry).
 
-## Tools
+This repository holds everything needed to use QR Cake from an AI assistant or from your own code:
 
-| Tool | What it does |
-| --- | --- |
-| `create_qr_code` | Create a dynamic QR code pointing to a URL (optional name + colours). |
-| `list_qr_codes` | List the account's QR codes with destinations and scan links. |
-| `get_qr_code` | Get one code's details by id. |
-| `update_qr_destination` | Change where an existing code points. The printed code is unchanged. |
-| `delete_qr_code` | Permanently delete a code. |
-| `get_account` | Show plan tier, usage, and limit. |
-| `get_qr_analytics` | Scan analytics: per-day counts, countries, or devices over a week/month/year. |
+- setup for the hosted **MCP server** at `https://api.qrcake.com/mcp`
+- the **QR Cake plugin for Claude** (`claude-plugin/`)
+- **REST API examples** in curl, Node.js and Python (`examples/rest/`)
 
-`get_qr_analytics` needs a QR Cake plan with analytics, and a backend deployment that
-includes the `/v1/analytic/api` route (analytic-service + gateway-service). The query is
-async on the backend; the tool polls for up to ~40s and asks Claude to retry if the
-query is still running.
+The server itself is hosted by QR Cake; there is nothing to run or deploy. Full reference: [QR Cake API and MCP docs](https://qrcake.com/docs).
 
-## Prerequisites
+## Connect an AI assistant
 
-- Node.js 20 or newer.
-- A QR Cake account and an **API key**. Create one in your dashboard under
-  **API Keys** ([qrcake.com/dashboard/api](https://qrcake.com/dashboard/api)). The key
-  is sent as the `x-api-key` header; it scopes every action to your account.
+The server speaks MCP over Streamable HTTP. You sign in with your QR Cake account and approve what the assistant may do: read your codes, change your codes, read scan analytics. No API key or password goes into a chat.
 
-## Install and build
+### Claude
 
-```bash
-npm install
-npm run build
+Install the QR Cake plugin, then connect your account when Claude asks.
+
+In Claude Code, install it in one step:
+
+```
+/plugin install qrcake --marketplace scriptedtools/qrcake-mcp
 ```
 
-## Configuration
+In the Claude apps, install the plugin from Customize > Plugins.
 
-The server is configured entirely through environment variables:
+The plugin adds the connector plus a skill and shortcuts such as `/qrcake:overview`, `/qrcake:create-qr`, `/qrcake:design-qr`, `/qrcake:report` and `/qrcake:help`. See [`claude-plugin/`](claude-plugin/).
 
-| Variable | Required | Default | Purpose |
-| --- | --- | --- | --- |
-| `QRCAKE_API_KEY` | yes | — | Your QR Cake API key. |
-| `QRCAKE_API_URL` | no | `https://api.qrcake.com` | API base URL. Point at dev to test. |
-| `QRCAKE_WEB_URL` | no | `https://qrcake.com` | Website base, used for dashboard links. |
+### Claude Code
 
-## Add it to Claude
-
-### Claude Desktop — one-click extension (.mcpb)
-
-Build the desktop extension bundle:
-
-```bash
-npm run bundle:mcpb
+```sh
+claude mcp add --transport http qrcake https://api.qrcake.com/mcp
 ```
 
-This produces `dist-mcpb/qrcake-<version>.mcpb` (manifest + single-file server, validated
-with the official `mcpb` CLI). Double-click it, or in Claude Desktop go to
-Settings → Extensions → Install extension, then paste your API key when prompted.
-The key is stored by Claude Desktop in the OS keychain.
+Then run `/mcp` inside Claude Code and sign in.
 
-### Claude Code (CLI)
+### Cursor
 
-```bash
-claude mcp add qrcake \
-  --env QRCAKE_API_KEY=your-api-key-here \
-  -- node /absolute/path/to/qrcake-mcp/dist/index.js
-```
-
-### Claude Desktop
-
-Add this to your `claude_desktop_config.json` (Settings → Developer → Edit Config):
+In `~/.cursor/mcp.json`, or `.cursor/mcp.json` in a project:
 
 ```json
 {
   "mcpServers": {
     "qrcake": {
-      "command": "node",
-      "args": ["/absolute/path/to/qrcake-mcp/dist/index.js"],
-      "env": {
-        "QRCAKE_API_KEY": "your-api-key-here"
-      }
+      "url": "https://api.qrcake.com/mcp"
     }
   }
 }
 ```
 
-Restart Claude Desktop after saving. See [`claude-config.example.json`](./claude-config.example.json).
+### VS Code
 
-## Example prompts
+In `.vscode/mcp.json`:
 
-- "Create a QR code for my new landing page at https://example.com/launch and call it Launch Poster."
-- "The launch page moved — point my Launch Poster code at https://example.com/live instead."
-- "List my QR codes and show where each one points."
-- "How many QR codes am I using on my plan?"
+```json
+{
+  "servers": {
+    "qrcake": {
+      "type": "http",
+      "url": "https://api.qrcake.com/mcp"
+    }
+  }
+}
+```
 
-## Testing against dev
+The client opens the QR Cake sign-in the first time it connects. A connection lasts up to 30 days, after which the client asks you to sign in again.
 
-Point the connector at the dev environment by setting
-`QRCAKE_API_URL=https://api.dev.qrcake.com` and using a dev-account API key. Everything
-else is identical.
+Claude, Claude Code, Cursor and VS Code can connect. Other clients are not accepted yet.
 
-## Roadmap
+## Tools
 
-- **QR image rendering** — return a rendered PNG/SVG of the code, not just the scan link.
-- **File QR codes** — point a code at an uploaded file (PDF, image) via the upload flow.
-- **Remote / hosted connector** with OAuth "connect your account", so it can be listed in
-  the Claude connector directory instead of configured with a pasted key.
+| Tool | What it does | Permission |
+|---|---|---|
+| `list_qr_codes` | List every QR code on the account with its short link, destination and state | Read codes |
+| `get_qr_code` | Get one QR code by id | Read codes |
+| `get_plan_limits` | Plan, codes used against the limit, whether analytics is included | Read codes |
+| `create_qr_code` | Create a dynamic QR code whose short link redirects to a URL | Change codes |
+| `update_qr_code` | Change a code's destination, state or content without reprinting it | Change codes |
+| `delete_qr_code` | Delete a code permanently; printed copies stop working | Change codes |
+| `create_file_upload` | Get an upload slot for a PDF, image, audio or video file to attach to a code | Change codes |
+| `design_qr_code` | Open an interactive designer for a code in the conversation, to change its shapes, colours, logo and frame; apps that cannot show it get the code's details | Read codes and change codes |
+| `get_qr_code_analytics` | Scans over time, locations and devices for one code, over a week, month or year (Pro and Business plans) | Read analytics |
+| `render_qr_code` | Draw any text or URL as a plain QR image (PNG or SVG); nothing is stored | None |
+| `build_qr_content` | Encode WiFi details, a contact card, an email, SMS, event, location and similar as QR text | None |
+| `analyze_qr_design` | Estimate how much error correction a styled design uses up | None |
 
-## How it works
+## Things you can ask
 
-The connector is a thin adapter over QR Cake's public API-key REST API
-(`/v1/product/api/*`, documented at [qrcake.com/openapi.json](https://qrcake.com/openapi.json)).
-Products live in QRPush; the connector never stores anything itself.
+- "Create a QR code for https://example.com/menu called Summer menu."
+- "Change Summer menu to point at https://example.com/autumn-menu."
+- "How many scans did Summer menu get this month, and where were they from?"
+- "Pause the Summer menu code."
+- "Make a QR code for our dinner menu PDF."
+- "Create codes for these ten links and tag them for the spring campaign."
+- "Make the Summer menu code dark green with rounded dots and a Scan me frame."
+- "Make a WiFi QR code for the network Cafe Guest."
+- "Is the Summer menu code ready to print?"
 
-## Privacy Policy
+## REST API
 
-QR Cake's privacy policy: **<https://qrcake.com/privacy>**
+The REST API uses an API key instead of a sign-in. Create one in your QR Cake dashboard and send it in the `x-api-key` header. API keys work with the REST API only, not with the MCP server.
 
-Connector-specific data handling:
+```sh
+# List your QR codes
+curl https://api.qrcake.com/v1/product/api/product \
+  -H "x-api-key: $QRCAKE_API_KEY"
 
-- **What it collects**: nothing. The connector runs locally and keeps no data of its own —
-  no logs, no telemetry, no analytics.
-- **Where data goes**: tool calls are sent directly from your machine to the QR Cake API
-  (`api.qrcake.com`) over HTTPS, authenticated with your API key. No third parties are
-  contacted.
-- **What QR Cake receives**: the QR code operations you ask for (destinations, names,
-  colours) — the same data as using the QR Cake dashboard. Handling and retention are
-  governed by the [QR Cake privacy policy](https://qrcake.com/privacy).
-- **Credential storage**: your API key is stored by the Claude client (in Claude Desktop,
-  the OS keychain via the extension's sensitive config), never by this connector. Revoke
-  it anytime in the dashboard under API Keys.
-- **Contact**: <support@qrcake.com>.
+# Create a dynamic QR code for a URL
+curl -X POST https://api.qrcake.com/v1/product/api/product \
+  -H "x-api-key: $QRCAKE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"redirect": "https://example.com/menu", "metadata": {"type": "redirect"}}'
+
+# Point it somewhere new; the printed code stays the same
+curl -X PUT https://api.qrcake.com/v1/product/api/product/$PRODUCT_ID \
+  -H "x-api-key: $QRCAKE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"redirect": "https://example.com/autumn-menu"}'
+```
+
+| Method and path | Purpose |
+|---|---|
+| `GET /product` | List QR codes |
+| `GET /product/{productId}` | Get one QR code |
+| `POST /product` | Create a QR code |
+| `PUT /product/{productId}` | Update a QR code |
+| `DELETE /product/{productId}` | Delete a QR code |
+| `GET /permission` | Show what the API key may do |
+
+Longer examples are in [`examples/rest/`](examples/rest/). The machine-readable spec is at [qrcake.com/openapi.json](https://qrcake.com/openapi.json).
+
+## Plans and limits
+
+The free plan includes up to 5 dynamic QR codes with unlimited scans, and the codes do not expire. Free-plan scans show a short ad before the destination. Scan analytics are part of the Pro and Business plans. The assistant works within your plan's limits and tells you when one is reached. Details: [QR Cake prices](https://qrcake.com/prices).
+
+## Good to know
+
+- A change reaches codes that are already printed straight away.
+- Deleting a code is permanent: printed copies stop working.
+- Images drawn in a chat are plain black on white. Colours, frames and logos are set in the designer or the [QR Cake editor](https://qrcake.com/), and print-ready downloads come from the editor.
+
+## Links
+
+- Website: [qrcake.com](https://qrcake.com/)
+- API and MCP docs: [qrcake.com/docs](https://qrcake.com/docs)
+- QR code tracking and scan analytics: [qrcake.com/qr-code-tracking](https://qrcake.com/qr-code-tracking)
+- QR codes that do not expire: [qrcake.com/qr-code-generator-no-expiry](https://qrcake.com/qr-code-generator-no-expiry)
+- Support: [qrcake.com/contact](https://qrcake.com/contact)
+
+## Licence
+
+[MIT](LICENSE) © Scripted Tools Ltd

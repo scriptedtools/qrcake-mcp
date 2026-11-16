@@ -1,7 +1,5 @@
-node_modules/
 dist/
-mcpb-build/
-dist-mcpb/
-*.log
-.env
+.env*
+node_modules/
 .DS_Store
+__pycache__/
