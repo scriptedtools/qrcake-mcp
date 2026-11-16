@@ -36,6 +36,15 @@ In the Claude apps, use the Customize > Plugins controls. You sign in on QR Cake
 
 A connection lasts up to 30 days, after which Claude asks you to connect again. The first time you connect with Google or Apple on an account that already exists with the same email, the attempt can fail once; connect again and it goes through.
 
+## Where your data goes
+
+- **QR Cake**, through the connector at `https://api.qrcake.com/mcp`: everything you create or change, including the names, links, contact details and other content you put on a code. QR Cake keeps it in your account until you delete it. See the [privacy policy](https://qrcake.com/privacy).
+- **QR Cake file storage**: when a conversation can send a file itself, Claude uploads it straight to QR Cake's storage, using a one-time upload address the connector issues (hosted on Amazon S3). Otherwise you upload the file yourself at qrcake.com/upload.
+- **qrcake.com, read only**: the public plan and price facts at `https://qrcake.com/ai-facts.json`. Nothing about you is sent.
+- **The links your own codes point to**: the check-up and the print check may open a code's destination to see whether it loads. Nothing from your account is sent with that request.
+
+Nothing is sent to any other service, and the plugin itself stores nothing.
+
 ## Try
 
 - "Create a QR code for https://example.com/menu called Summer menu."
