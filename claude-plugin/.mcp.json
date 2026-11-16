@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "qrcake": {
+      "type": "http",
+      "url": "https://api.qrcake.com/mcp"
+    }
+  }
+}

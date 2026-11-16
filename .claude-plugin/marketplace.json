@@ -1,0 +1,17 @@
+{
+  "name": "qrcake",
+  "owner": {
+    "name": "Scripted Tools Ltd",
+    "url": "https://qrcake.com"
+  },
+  "metadata": {
+    "description": "The QR Cake plugin for Claude: manage your dynamic QR codes, their design and their scan analytics from a conversation."
+  },
+  "plugins": [
+    {
+      "name": "qrcake",
+      "source": "./claude-plugin",
+      "description": "Create, restyle, update and track your QR Cake dynamic QR codes from Claude, with your existing QR Cake account."
+    }
+  ]
+}
